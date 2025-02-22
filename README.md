@@ -1,4 +1,4 @@
-* Python Algorithm analyzer.
+## Python Algorithm analyzer.
 Using matplotlib and pygame libraries
 
 
