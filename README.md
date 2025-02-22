@@ -1,3 +1,5 @@
-Python Algorithm analyzer.
+* Python Algorithm analyzer.
+Using matplotlib and pygame libraries
 
-Using matplotlib
+
+Compare the speed of various algorithms
