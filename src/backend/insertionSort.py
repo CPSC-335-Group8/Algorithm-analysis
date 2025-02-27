@@ -14,7 +14,7 @@ def insertion_sort(arr):
 
 def get_time(arr):
     start = time.time()
-    insertion_sort(arr):
+    insertion_sort(arr)
     end = time.time()
 
     return end - start
