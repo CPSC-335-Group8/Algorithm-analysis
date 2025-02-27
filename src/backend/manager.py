@@ -4,9 +4,49 @@ import insertionSort
 import quickSort
 import radixSort
 
-test = [1,5,62,7,3,2,6,7,84,2,6126,236,6,36,26362,62,62,36]
+import random
 
-val = radixSort.get_time(test)
-valformated = f"{val:.6f}"
+#test = [1,5,62,7,3,2,6,7,84,2,6126,236,6,36,26362,62,62,36]
 
-print(valformated)
+# Parameter one: list of bools. We use this to determin what algorithms we are running
+# [bubble sort, merge sort, insertion sort, quick sort, radix sort]
+
+
+# Parameter two: Random array size. Generate a random array based of the size. IF SIZE == -1, the user has manually inputed an array
+
+
+# Parameter three: Manual input array. Self explanitory
+
+
+# End result is an array of times. ex: [0.0052, 0.00013, 0, 0.0042, 0] where 0 is a algorithm that was not ran
+def get_times(algos: list[bool], size: int, arr) -> list[float]:
+    times = []
+    if (size == -1):
+        elements = arr
+    else:
+        # Get a random array based on size:
+        elements = [random.randint(10,9999) for _ in range(size)]
+
+    # Get times
+    for i in range(len(algos)):
+        if algos[i] == True:
+            match i:
+                case 0:
+                    times.append(f"{bubbleSort.get_time(elements):.6f}")
+                case 1:
+                    times.append(f"{mergeSort.get_time(elements):.6f}")
+                case 2:
+                    times.append(f"{insertionSort.get_time(elements):.6f}")
+                case 3:
+                    times.append(f"{quickSort.get_time(elements):.6f}")
+                case 4:
+                    times.append(f"{radixSort.get_time(elements):.6f}")
+                case _:
+                    print("An error has occured")
+        else:
+            times.append(0)
+
+    print(times)
+
+algos = [True, False, True, True, False]
+get_times(algos, 100, [])
