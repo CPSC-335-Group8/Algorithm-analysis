@@ -2,6 +2,20 @@ import pygame
 import random
 import time
 import sys
+import os
+
+# Add the backend and graphing directories to the Python path
+sys.path.append(os.path.abspath("src/backend"))
+sys.path.append(os.path.abspath("src/graphing"))
+
+# Import sorting algorithms and utility functions
+from bubbleSort import bubble_sort
+from mergeSort import merge_sort
+from insertionSort import insertion_sort
+from quickSort import quick_sort
+from radixSort import lsd_radix_sort
+from linearSearch import linear_search
+from displayGraph import showGraph, getStrings
 
 # Initialize Pygame
 pygame.init()
@@ -43,84 +57,7 @@ def draw_button(surface, rect, text, font, bg_color, text_color, hover=False):
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
 
-# Sorting Algorithms
-
-def bubble_sort(arr):
-    n = len(arr)
-    for i in range(n):
-        for j in range(0, n - i - 1):
-            if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-
-def insertion_sort(arr):
-    for i in range(1, len(arr)):
-        key = arr[i]
-        j = i - 1
-        while j >= 0 and key < arr[j]:
-            arr[j + 1] = arr[j]
-            j -= 1
-        arr[j + 1] = key
-
-def merge_sort(arr):
-    if len(arr) > 1:
-        mid = len(arr) // 2
-        left_half = arr[:mid]
-        right_half = arr[mid:]
-        merge_sort(left_half)
-        merge_sort(right_half)
-        i = j = k = 0
-        while i < len(left_half) and j < len(right_half):
-            if left_half[i] < right_half[j]:
-                arr[k] = left_half[i]
-                i += 1
-            else:
-                arr[k] = right_half[j]
-                j += 1
-            k += 1
-        while i < len(left_half):
-            arr[k] = left_half[i]
-            i += 1
-            k += 1
-        while j < len(right_half):
-            arr[k] = right_half[j]
-            j += 1
-            k += 1
-
-def quick_sort(arr):
-    if len(arr) <= 1:
-        return arr
-    pivot = arr[len(arr) // 2]
-    left = [x for x in arr if x < pivot]
-    middle = [x for x in arr if x == pivot]
-    right = [x for x in arr if x > pivot]
-    return quick_sort(left) + middle + quick_sort(right)
-
-def radix_sort(arr):
-    max_digit = max(arr)
-    exp = 1
-    while max_digit // exp > 0:
-        counting_sort(arr, exp)
-        exp *= 10
-
-def counting_sort(arr, exp):
-    n = len(arr)
-    output = [0] * n
-    count = [0] * 10
-    for i in arr:
-        index = (i // exp) % 10
-        count[index] += 1
-    for i in range(1, 10):
-        count[i] += count[i - 1]
-    i = n - 1
-    while i >= 0:
-        index = (arr[i] // exp) % 10
-        output[count[index] - 1] = arr[i]
-        count[index] -= 1
-        i -= 1
-    for i in range(n):
-        arr[i] = output[i]
-
-# Checkbox class for algorithm selection
+# Class to represent a checkbox
 class Checkbox:
     def __init__(self, text, x, y):
         self.text = text
@@ -138,7 +75,7 @@ class Checkbox:
     def toggle(self):
         self.checked = not self.checked
 
-# Function to draw the UI
+# Function to draw the user interface
 def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, checkboxes, text, size_text, color, sorted_arr, results_screen=False, execution_times=None, input_valid=False, validation_message="", active_input=False, active_size=False, blink=False):
     screen.fill(LIGHT_BLUE)
     if not results_screen:
@@ -209,7 +146,15 @@ def main():
     text = ''
     size_text = ''
     running = True
-    checkboxes = [Checkbox("Bubble Sort", 50, 200), Checkbox("Insertion Sort", 50, 230), Checkbox("Merge Sort", 50, 260), Checkbox("Quick Sort", 50, 290), Checkbox("Radix Sort", 50, 320)]
+    checkboxes = [
+        Checkbox("Bubble Sort", 50, 200),
+        Checkbox("Insertion Sort", 50, 230),
+        Checkbox("Merge Sort", 50, 260),
+        Checkbox("Quick Sort", 50, 290),
+        Checkbox("Radix Sort", 50, 320),
+        Checkbox("Linear Search", 50, 350), 
+        Checkbox("Select All", 50, 380)  
+    ]
     active_input = False
     active_size = False
     results_screen = False
@@ -255,8 +200,12 @@ def main():
                 elif run_box.collidepoint(event.pos):
                     if input_valid:
                         execution_times = {}
-                        for checkbox in checkboxes:
-                            if checkbox.checked:
+                        selected_algorithms = [checkbox for checkbox in checkboxes if checkbox.checked and checkbox.text != "Select All"]
+                        
+                        if not selected_algorithms:  # No algorithms selected
+                            validation_message = "Please select at least one algorithm to run."
+                        else:
+                            for checkbox in selected_algorithms:
                                 start_time = time.time()
                                 if checkbox.text == "Bubble Sort":
                                     bubble_sort(sorted_arr)
@@ -267,10 +216,18 @@ def main():
                                 elif checkbox.text == "Quick Sort":
                                     sorted_arr = quick_sort(sorted_arr)
                                 elif checkbox.text == "Radix Sort":
-                                    radix_sort(sorted_arr)
+                                    lsd_radix_sort(sorted_arr)
+                                elif checkbox.text == "Linear Search":
+                                    element = random.choice(sorted_arr)  # Pick a random element to search
+                                    linear_search(sorted_arr, element)
                                 end_time = time.time()
-                                execution_times[checkbox.text] = (end_time - start_time) * 1_000_000
-                        results_screen = True
+                                execution_times[checkbox.text] = int((end_time - start_time) * 1_000_000)  # Convert to integer
+                            
+                            if execution_times:  # Only show the graph if there are results
+                                results_screen = True
+                                showGraph(getStrings(list(execution_times.values())))
+                            else:
+                                validation_message = "No algorithms were executed."
                     else:
                         validation_message = "Invalid input! Please generate a valid array first."
                 elif back_box.collidepoint(event.pos) and results_screen:
@@ -280,7 +237,13 @@ def main():
                     active_size = False
                 for checkbox in checkboxes:
                     if checkbox.rect.collidepoint(event.pos):
-                        checkbox.toggle()
+                        if checkbox.text == "Select All":
+                            # Toggle all checkboxes
+                            for cb in checkboxes:
+                                if cb != checkbox:  # Don't toggle "Select All" itself
+                                    cb.checked = not checkbox.checked
+                        else:
+                            checkbox.toggle()
             if event.type == pygame.KEYDOWN:
                 if active_input:
                     if event.key == pygame.K_BACKSPACE:
@@ -294,10 +257,11 @@ def main():
                         size_text += event.unicode
 
         # Blinking cursor logic
-        blink_timer += 1
-        if blink_timer >= 1000:  # Toggle blink every 15 frames (0.25 seconds at 60 FPS)
-            blink = not blink
-            blink_timer = 0
+        current_time = pygame.time.get_ticks()
+        if current_time % 1000 < 500:  # Blink every 500ms
+            blink = True
+        else:
+            blink = False
 
         draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, checkboxes, text, size_text, BLACK, sorted_arr, results_screen, execution_times, input_valid, validation_message, active_input, active_size, blink)
     pygame.quit()
