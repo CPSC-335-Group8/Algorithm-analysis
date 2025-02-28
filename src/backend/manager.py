@@ -51,5 +51,5 @@ def get_times(algos: list[bool], size: int, arr) -> list[float]:
 
     print(times)
 
-algos = [True, False, True, True, False, True]
+algos = [True, True, True, True, True, True]
 get_times(algos, -1, [5, 52, 6, 20, 521, 5251, 0])
