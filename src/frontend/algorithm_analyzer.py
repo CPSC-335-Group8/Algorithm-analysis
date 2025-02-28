@@ -4,7 +4,7 @@ import time
 import sys
 import os
 
-# Add the backend and graphing directories to the Python path
+# Add backend and graphing directories to Python path
 sys.path.append(os.path.abspath("src/backend"))
 sys.path.append(os.path.abspath("src/graphing"))
 
@@ -20,7 +20,7 @@ from displayGraph import showGraph, getStrings
 # Initialize Pygame
 pygame.init()
 
-# Define constants for screen dimensions and colors
+# Screen dimensions and colors
 WIDTH, HEIGHT = 1000, 600
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -32,20 +32,38 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 ORANGE = (255, 165, 0)
 
-# Use default font
-FONT = pygame.font.Font(None, 24)  # Default font
+# Fonts
+FONT = pygame.font.Font(None, 24)
 BUTTON_FONT = pygame.font.Font(None, 20)
 
-# Set up the display
+# Set up display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Sorting Algorithm Selector")
 
-# Function to draw a rounded rectangle
+def draw_text_wrapped(surface, text, font, color, rect, padding=10):
+    """Render text within a rectangle, wrapping to the next line if necessary."""
+    words = text.split(", ")
+    space_width, line_height = font.size(" ")
+    x, y = rect.x + padding, rect.y + padding
+    max_width = rect.width - 2 * padding
+
+    for word in words:
+        word_surface = font.render(word, True, color)
+        word_width, _ = word_surface.get_size()
+
+        if x + word_width >= rect.x + max_width:
+            x = rect.x + padding
+            y += line_height
+
+        surface.blit(word_surface, (x, y))
+        x += word_width + space_width
+
 def draw_rounded_rect(surface, color, rect, radius=10):
+    """Draw a rectangle with rounded corners."""
     pygame.draw.rect(surface, color, rect, border_radius=radius)
 
-# Function to draw a button with hover effect
 def draw_button(surface, rect, text, font, bg_color, text_color, hover=False):
+    """Draw a button with a hover effect."""
     if hover:
         bg_color = (
             min(bg_color[0] + 20, 255),
@@ -57,8 +75,8 @@ def draw_button(surface, rect, text, font, bg_color, text_color, hover=False):
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
 
-# Class to represent a checkbox
 class Checkbox:
+    """A simple checkbox UI element."""
     def __init__(self, text, x, y):
         self.text = text
         self.rect = pygame.Rect(x, y, 20, 20)
@@ -66,6 +84,7 @@ class Checkbox:
         self.label = FONT.render(text, True, BLACK)
     
     def draw(self, surface):
+        """Draw the checkbox and its label."""
         pygame.draw.rect(surface, BLACK, self.rect, 2, border_radius=5)
         if self.checked:
             pygame.draw.line(surface, BLACK, (self.rect.x, self.rect.y), (self.rect.x + 20, self.rect.y + 20), 3)
@@ -73,68 +92,82 @@ class Checkbox:
         surface.blit(self.label, (self.rect.x + 30, self.rect.y))
 
     def toggle(self):
+        """Toggle the checkbox state."""
         self.checked = not self.checked
 
-# Function to draw the user interface
-def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, checkboxes, text, size_text, color, sorted_arr, results_screen=False, execution_times=None, input_valid=False, validation_message="", active_input=False, active_size=False, blink=False):
+def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, checkboxes, text, size_text, sorted_arr, results_screen=False, execution_times=None, input_valid=False, validation_message="", active_input=False, active_size=False, blink=False):
+    """Draw the main user interface."""
     screen.fill(LIGHT_BLUE)
+    mouse_pos = pygame.mouse.get_pos()
+
     if not results_screen:
         pygame.draw.rect(screen, WHITE, (40, 40, 920, 130), border_radius=10)
-        prompt_surface = FONT.render("Enter numbers (comma-separated):", True, BLACK)
-        screen.blit(prompt_surface, (50, 55))
+        screen.blit(FONT.render("Enter numbers (comma-separated):", True, BLACK), (50, 55))
+        
+        # Input box
         pygame.draw.rect(screen, WHITE, input_box, border_radius=5)
-        pygame.draw.rect(screen, BLACK, input_box, 2, border_radius=5)  # Solid black border
-        txt_surface = FONT.render(text, True, BLACK)
+        pygame.draw.rect(screen, BLACK, input_box, 2, border_radius=5)
+        formatted_text = text + ("|" if active_input and blink else "")
+        txt_surface = FONT.render(formatted_text, True, BLACK)
         screen.blit(txt_surface, (input_box.x + 10, input_box.y + 5))
-        if active_input and blink:  # Draw blinking cursor
-            cursor_x = input_box.x + 10 + txt_surface.get_width()
-            pygame.draw.line(screen, BLACK, (cursor_x, input_box.y + 5), (cursor_x, input_box.y + 25), 2)
 
-        size_prompt_surface = FONT.render("Enter array size:", True, BLACK)
-        screen.blit(size_prompt_surface, (50, 105))
+        # Array size box
+        screen.blit(FONT.render("Enter array size:", True, BLACK), (50, 105))
         pygame.draw.rect(screen, WHITE, size_box, border_radius=5)
-        pygame.draw.rect(screen, BLACK, size_box, 2, border_radius=5)  # Solid black border
-        size_txt_surface = FONT.render(size_text, True, BLACK)
+        pygame.draw.rect(screen, BLACK, size_box, 2, border_radius=5)
+        size_txt_surface = FONT.render(size_text + ("|" if active_size and blink else ""), True, BLACK)
         screen.blit(size_txt_surface, (size_box.x + 10, size_box.y + 5))
-        if active_size and blink:  # Draw blinking cursor
-            cursor_x = size_box.x + 10 + size_txt_surface.get_width()
-            pygame.draw.line(screen, BLACK, (cursor_x, size_box.y + 5), (cursor_x, size_box.y + 25), 2)
 
-        mouse_pos = pygame.mouse.get_pos()
+        # Buttons
         draw_button(screen, generate_box, "Generate Array", BUTTON_FONT, BLUE, WHITE, generate_box.collidepoint(mouse_pos))
         draw_button(screen, reset_box, "Reset", BUTTON_FONT, RED, WHITE, reset_box.collidepoint(mouse_pos))
         draw_button(screen, run_box, "Run Algorithms & Plot Comparison", BUTTON_FONT, GREEN, WHITE, run_box.collidepoint(mouse_pos))
 
+        # Checkboxes
         for checkbox in checkboxes:
             checkbox.draw(screen)
 
-        sorted_text = FONT.render("Generated Array: " + str(sorted_arr), True, BLACK)
-        screen.blit(sorted_text, (50, 350))
+        # Generated array display
+        array_label = FONT.render("Generated Array:", True, BLACK)
+        screen.blit(array_label, (250, 200))
+        array_box = pygame.Rect(250, 220, 600, 180)
+        pygame.draw.rect(screen, WHITE, array_box, border_radius=5)
+        pygame.draw.rect(screen, BLACK, array_box, 2, border_radius=5)
 
+        if sorted_arr:
+            array_text = ", ".join(map(str, sorted_arr))
+            draw_text_wrapped(screen, array_text, FONT, BLACK, array_box, padding=10)
+        else:
+            draw_text_wrapped(screen, "No array generated.", FONT, DARK_GRAY, array_box, padding=10)
+
+        # Validation message
         if not input_valid and validation_message:
             validation_surface = FONT.render(validation_message, True, RED)
-            screen.blit(validation_surface, (50, 400))
+            screen.blit(validation_surface, (50, 420))
+
     else:
+        # Results screen
         pygame.draw.rect(screen, WHITE, (40, 40, 920, 500), border_radius=10)
         y_offset = 50
         for algo, time_taken in execution_times.items():
             result_text = FONT.render(f"{algo}: {time_taken:.2f} microseconds", True, BLACK)
             screen.blit(result_text, (50, y_offset))
             y_offset += 30
-        mouse_pos = pygame.mouse.get_pos()
+
         draw_button(screen, back_box, "Back", BUTTON_FONT, ORANGE, WHITE, back_box.collidepoint(mouse_pos))
+
     pygame.display.flip()
 
-# Function to validate user input
 def validate_input(input_text):
+    """Validate user input to ensure it contains only comma-separated numbers."""
     try:
-        numbers = [int(x.strip()) for x in input_text.split(",")]
+        numbers = [int(x.strip()) for x in input_text.split(",") if x.strip().isdigit()]
         return True, numbers
     except ValueError:
         return False, None
 
-# Main function to run the application
 def main():
+    """Main function to run the application."""
     arr = []
     sorted_arr = []
     input_box = pygame.Rect(350, 50, 400, 32)
@@ -162,7 +195,6 @@ def main():
     input_valid = False
     validation_message = ""
     blink = False
-    blink_timer = 0
 
     while running:
         for event in pygame.event.get():
@@ -202,11 +234,15 @@ def main():
                         execution_times = {}
                         selected_algorithms = [checkbox for checkbox in checkboxes if checkbox.checked and checkbox.text != "Select All"]
                         
-                        if not selected_algorithms:  # No algorithms selected
+                        if not selected_algorithms:
                             validation_message = "Please select at least one algorithm to run."
                         else:
+                            sorted_arr = arr.copy()
+
                             for checkbox in selected_algorithms:
                                 start_time = time.time()
+                                temp_arr = sorted_arr.copy()
+
                                 if checkbox.text == "Bubble Sort":
                                     bubble_sort(sorted_arr)
                                 elif checkbox.text == "Insertion Sort":
@@ -218,29 +254,31 @@ def main():
                                 elif checkbox.text == "Radix Sort":
                                     lsd_radix_sort(sorted_arr)
                                 elif checkbox.text == "Linear Search":
-                                    element = random.choice(sorted_arr)  # Pick a random element to search
+                                    element = random.choice(sorted_arr)
                                     linear_search(sorted_arr, element)
+
                                 end_time = time.time()
-                                execution_times[checkbox.text] = int((end_time - start_time) * 1_000_000)  # Convert to integer
-                            
-                            if execution_times:  # Only show the graph if there are results
+                                execution_times[checkbox.text] = int((end_time - start_time) * 1_000_000)
+
+                            if execution_times:
                                 results_screen = True
                                 showGraph(getStrings(list(execution_times.values())))
                             else:
                                 validation_message = "No algorithms were executed."
                     else:
                         validation_message = "Invalid input! Please generate a valid array first."
+
                 elif back_box.collidepoint(event.pos) and results_screen:
                     results_screen = False
+                    sorted_arr = arr.copy()
                 else:
                     active_input = False
                     active_size = False
                 for checkbox in checkboxes:
                     if checkbox.rect.collidepoint(event.pos):
                         if checkbox.text == "Select All":
-                            # Toggle all checkboxes
                             for cb in checkboxes:
-                                if cb != checkbox:  # Don't toggle "Select All" itself
+                                if cb != checkbox:
                                     cb.checked = not checkbox.checked
                         else:
                             checkbox.toggle()
@@ -257,15 +295,9 @@ def main():
                         size_text += event.unicode
 
         # Blinking cursor logic
-        current_time = pygame.time.get_ticks()
-        if current_time % 1000 < 500:  # Blink every 500ms
-            blink = True
-        else:
-            blink = False
+        blink = (pygame.time.get_ticks() // 500) % 2 == 0
 
-        draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, checkboxes, text, size_text, BLACK, sorted_arr, results_screen, execution_times, input_valid, validation_message, active_input, active_size, blink)
-    pygame.quit()
-    sys.exit()
+        draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, checkboxes, text, size_text, sorted_arr, results_screen, execution_times, input_valid, validation_message, active_input, active_size, blink)
 
 if __name__ == "__main__":
     main()

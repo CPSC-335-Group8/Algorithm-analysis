@@ -62,7 +62,3 @@ def showGraph(dictionary):
     plt.title("Comparing Execution Time of Different Algorithms")
     plt.show()
 
-
-
-testArray = [123, 0, 56, 45, 32, 0]
-showGraph(getStrings(testArray))
