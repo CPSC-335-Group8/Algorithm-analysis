@@ -19,6 +19,8 @@ def getStrings(times):
                     algoNames.append("Quick Sort")
                 case 4:
                     algoNames.append("Radix Sort")
+                case 5:
+                    algoNames.append("Linear Search")
     
     #getting rid of the zeros for the graph
     while(0 in times):
@@ -50,7 +52,7 @@ def showGraph(dictionary):
         if i < len(time_ranges[0]): #to avoid out of bounds error(i doesn't stop counting up)
             plt.bar(names, [row[i] for row in time_ranges], color="BLUE")
     
-    
+
     i = 0
     anim = animation.FuncAnimation(fig, animate, interval = 50, cache_frame_data=False)
     
@@ -62,5 +64,5 @@ def showGraph(dictionary):
 
 
 
-testArray = [123, 0, 56, 45, 32]
+testArray = [123, 0, 56, 45, 32, 0]
 showGraph(getStrings(testArray))
