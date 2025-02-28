@@ -47,7 +47,9 @@ def draw_text_wrapped(surface, text, font, color, rect, padding=10):
     x, y = rect.x + padding, rect.y + padding
     max_width = rect.width - 2 * padding
 
-    for word in words:
+    for i, word in enumerate(words):
+        if i < len(words) - 1:
+            word += ", "
         word_surface = font.render(word, True, color)
         word_width, _ = word_surface.get_size()
 
@@ -56,7 +58,7 @@ def draw_text_wrapped(surface, text, font, color, rect, padding=10):
             y += line_height
 
         surface.blit(word_surface, (x, y))
-        x += word_width + space_width
+        x += word_width
 
 # Draw a rectangle with rounded corners.
 def draw_rounded_rect(surface, color, rect, radius=10):
@@ -83,7 +85,7 @@ class Checkbox:
         self.checked = False
         self.label = FONT.render(text, True, BLACK)
 
-    # Draw the checkbox and its label.
+# Draw the checkbox and its label.
     def draw(self, surface):
         pygame.draw.rect(surface, BLACK, self.rect, 2, border_radius=5)
         if self.checked:
@@ -91,7 +93,7 @@ class Checkbox:
             pygame.draw.line(surface, BLACK, (self.rect.x, self.rect.y + 20), (self.rect.x + 20, self.rect.y), 3)
         surface.blit(self.label, (self.rect.x + 30, self.rect.y))
 
-    # Toggle the checkbox state.
+# Toggle the checkbox state.
     def toggle(self):
         self.checked = not self.checked
 
@@ -135,13 +137,13 @@ def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, che
         pygame.draw.rect(screen, BLACK, array_box, 2, border_radius=5)
 
         if sorted_arr:
-            array_text = ", ".join(map(str, sorted_arr))  # Join elements with commas
+            array_text = ", ".join(map(str, sorted_arr))
             draw_text_wrapped(screen, array_text, FONT, BLACK, array_box, padding=10)
         else:
             draw_text_wrapped(screen, "No array generated.", FONT, DARK_GRAY, array_box, padding=10)
 
         # Validation message
-        if not input_valid and validation_message:
+        if validation_message:
             validation_surface = FONT.render(validation_message, True, RED)
             screen.blit(validation_surface, (50, 420))
 
@@ -161,10 +163,20 @@ def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, che
 # Validate user input to ensure it contains only comma-separated numbers.
 def validate_input(input_text):
     try:
-        numbers = [int(x.strip()) for x in input_text.split(",") if x.strip().isdigit()]
-        return True, numbers
+        parts = [x.strip() for x in input_text.split(",")]
+        if all(part.isdigit() for part in parts):
+            numbers = [int(part) for part in parts]
+            return True, numbers
+        else:
+            return False, None
     except ValueError:
         return False, None
+
+# Validate the array size input to ensure it is a positive integer.
+def validate_size_input(size_text):
+    if size_text.isdigit() and int(size_text) > 0:
+        return True, int(size_text)
+    return False, None
 
 # Main function to run the application.
 def main():
@@ -208,16 +220,21 @@ def main():
                     active_size = True
                     active_input = False
                 elif generate_box.collidepoint(event.pos):
-                    if size_text.isdigit():
-                        size = int(size_text)
-                        arr = [random.randint(1, 100) for _ in range(size)]
-                        sorted_arr = arr.copy()
-                        input_valid = True
+                    if size_text:
+                        size_valid, size = validate_size_input(size_text)
+                        if size_valid:
+                            arr = [random.randint(1, 100) for _ in range(size)]
+                            sorted_arr = arr.copy()
+                            input_valid = True
+                            validation_message = ""
+                        else:
+                            validation_message = "Invalid input! Please generate a valid array first."
                     else:
                         input_valid, numbers = validate_input(text)
                         if input_valid:
                             arr = numbers
                             sorted_arr = arr.copy()
+                            validation_message = ""
                         else:
                             validation_message = "Invalid input! Please enter numbers separated by commas."
                 elif reset_box.collidepoint(event.pos):
@@ -231,31 +248,28 @@ def main():
                         checkbox.checked = False
                 elif run_box.collidepoint(event.pos):
                     if input_valid:
-                        execution_times = {}
                         selected_algorithms = [checkbox for checkbox in checkboxes if checkbox.checked and checkbox.text != "Select All"]
-                        
                         if not selected_algorithms:
                             validation_message = "Please select at least one algorithm to run."
                         else:
-                            sorted_arr = arr.copy()
-
+                            execution_times = {}
                             for checkbox in selected_algorithms:
+                                temp_arr = arr.copy()
                                 start_time = time.time()
-                                temp_arr = sorted_arr.copy()
 
                                 if checkbox.text == "Bubble Sort":
-                                    bubble_sort(sorted_arr)
+                                    bubble_sort(temp_arr)
                                 elif checkbox.text == "Insertion Sort":
-                                    insertion_sort(sorted_arr)
+                                    insertion_sort(temp_arr)
                                 elif checkbox.text == "Merge Sort":
-                                    merge_sort(sorted_arr)
+                                    merge_sort(temp_arr)
                                 elif checkbox.text == "Quick Sort":
-                                    sorted_arr = quick_sort(sorted_arr)
+                                    temp_arr = quick_sort(temp_arr)
                                 elif checkbox.text == "Radix Sort":
-                                    lsd_radix_sort(sorted_arr)
+                                    lsd_radix_sort(temp_arr)
                                 elif checkbox.text == "Linear Search":
-                                    element = random.choice(sorted_arr)
-                                    linear_search(sorted_arr, element)
+                                    element = random.choice(temp_arr)
+                                    linear_search(temp_arr, element)
 
                                 end_time = time.time()
                                 execution_times[checkbox.text] = int((end_time - start_time) * 1_000_000)
@@ -263,14 +277,13 @@ def main():
                             if execution_times:
                                 results_screen = True
                                 showGraph(getStrings(list(execution_times.values())))
-                            else:
-                                validation_message = "No algorithms were executed."
                     else:
                         validation_message = "Invalid input! Please generate a valid array first."
 
                 elif back_box.collidepoint(event.pos) and results_screen:
                     results_screen = False
                     sorted_arr = arr.copy()
+                    validation_message = ""
                 else:
                     active_input = False
                     active_size = False
