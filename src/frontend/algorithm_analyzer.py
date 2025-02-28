@@ -40,8 +40,8 @@ BUTTON_FONT = pygame.font.Font(None, 20)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Sorting Algorithm Selector")
 
+# Render text within a rectangle, wrapping to the next line if necessary.
 def draw_text_wrapped(surface, text, font, color, rect, padding=10):
-    """Render text within a rectangle, wrapping to the next line if necessary."""
     words = text.split(", ")
     space_width, line_height = font.size(" ")
     x, y = rect.x + padding, rect.y + padding
@@ -58,12 +58,12 @@ def draw_text_wrapped(surface, text, font, color, rect, padding=10):
         surface.blit(word_surface, (x, y))
         x += word_width + space_width
 
+# Draw a rectangle with rounded corners.
 def draw_rounded_rect(surface, color, rect, radius=10):
-    """Draw a rectangle with rounded corners."""
     pygame.draw.rect(surface, color, rect, border_radius=radius)
 
+# Draw a button with a hover effect.
 def draw_button(surface, rect, text, font, bg_color, text_color, hover=False):
-    """Draw a button with a hover effect."""
     if hover:
         bg_color = (
             min(bg_color[0] + 20, 255),
@@ -75,28 +75,28 @@ def draw_button(surface, rect, text, font, bg_color, text_color, hover=False):
     text_rect = text_surface.get_rect(center=rect.center)
     surface.blit(text_surface, text_rect)
 
+# A simple checkbox UI element.
 class Checkbox:
-    """A simple checkbox UI element."""
     def __init__(self, text, x, y):
         self.text = text
         self.rect = pygame.Rect(x, y, 20, 20)
         self.checked = False
         self.label = FONT.render(text, True, BLACK)
-    
+
+    # Draw the checkbox and its label.
     def draw(self, surface):
-        """Draw the checkbox and its label."""
         pygame.draw.rect(surface, BLACK, self.rect, 2, border_radius=5)
         if self.checked:
             pygame.draw.line(surface, BLACK, (self.rect.x, self.rect.y), (self.rect.x + 20, self.rect.y + 20), 3)
             pygame.draw.line(surface, BLACK, (self.rect.x, self.rect.y + 20), (self.rect.x + 20, self.rect.y), 3)
         surface.blit(self.label, (self.rect.x + 30, self.rect.y))
 
+    # Toggle the checkbox state.
     def toggle(self):
-        """Toggle the checkbox state."""
         self.checked = not self.checked
 
+# Draw the main user interface.
 def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, checkboxes, text, size_text, sorted_arr, results_screen=False, execution_times=None, input_valid=False, validation_message="", active_input=False, active_size=False, blink=False):
-    """Draw the main user interface."""
     screen.fill(LIGHT_BLUE)
     mouse_pos = pygame.mouse.get_pos()
 
@@ -135,7 +135,7 @@ def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, che
         pygame.draw.rect(screen, BLACK, array_box, 2, border_radius=5)
 
         if sorted_arr:
-            array_text = ", ".join(map(str, sorted_arr))
+            array_text = ", ".join(map(str, sorted_arr))  # Join elements with commas
             draw_text_wrapped(screen, array_text, FONT, BLACK, array_box, padding=10)
         else:
             draw_text_wrapped(screen, "No array generated.", FONT, DARK_GRAY, array_box, padding=10)
@@ -158,16 +158,16 @@ def draw_ui(input_box, size_box, generate_box, reset_box, run_box, back_box, che
 
     pygame.display.flip()
 
+# Validate user input to ensure it contains only comma-separated numbers.
 def validate_input(input_text):
-    """Validate user input to ensure it contains only comma-separated numbers."""
     try:
         numbers = [int(x.strip()) for x in input_text.split(",") if x.strip().isdigit()]
         return True, numbers
     except ValueError:
         return False, None
 
+# Main function to run the application.
 def main():
-    """Main function to run the application."""
     arr = []
     sorted_arr = []
     input_box = pygame.Rect(350, 50, 400, 32)
