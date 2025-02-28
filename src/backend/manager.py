@@ -33,17 +33,17 @@ def get_times(algos: list[bool], size: int, arr) -> list[float]:
         if algos[i] == True:
             match i:
                 case 0:
-                    times.append(f"{bubbleSort.get_time(elements):.6f}")
+                    times.append(f"{bubbleSort.get_time(elements)*(1000000):.6f}")
                 case 1:
-                    times.append(f"{mergeSort.get_time(elements):.6f}")
+                    times.append(f"{mergeSort.get_time(elements)*(1000000):.6f}")
                 case 2:
-                    times.append(f"{insertionSort.get_time(elements):.6f}")
+                    times.append(f"{insertionSort.get_time(elements)*(1000000):.6f}")
                 case 3:
-                    times.append(f"{quickSort.get_time(elements):.6f}")
+                    times.append(f"{quickSort.get_time(elements)*(1000000):.6f}")
                 case 4:
-                    times.append(f"{radixSort.get_time(elements):.6f}")
+                    times.append(f"{radixSort.get_time(elements)*(1000000):.6f}")
                 case 5:
-                    times.append(f"{linearSearch.get_time(elements):.6f}")
+                    times.append(f"{linearSearch.get_time(elements)*(1000000):.6f}")
                 case _:
                     print("An error has occured")
         else:
