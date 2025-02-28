@@ -20,7 +20,7 @@ import random
 
 
 # End result is an array of times. ex: [0.0052, 0.00013, 0, 0.0042, 0] where 0 is a algorithm that was not ran
-def get_times(algos: list[bool], size: int, arr) -> list[float]:
+def get_times(algos: list[bool], size: int, arr) -> list[int]:
     times = []
     if (size == -1):
         elements = arr
@@ -33,17 +33,17 @@ def get_times(algos: list[bool], size: int, arr) -> list[float]:
         if algos[i] == True:
             match i:
                 case 0:
-                    times.append(f"{bubbleSort.get_time(elements)*(1000000):.6f}")
+                    times.append(int(bubbleSort.get_time(elements)*(1000000)))
                 case 1:
-                    times.append(f"{mergeSort.get_time(elements)*(1000000):.6f}")
+                    times.append(int(mergeSort.get_time(elements)*(1000000)))
                 case 2:
-                    times.append(f"{insertionSort.get_time(elements)*(1000000):.6f}")
+                    times.append(int(insertionSort.get_time(elements)*(1000000)))
                 case 3:
-                    times.append(f"{quickSort.get_time(elements)*(1000000):.6f}")
+                    times.append(int(quickSort.get_time(elements)*(1000000)))
                 case 4:
-                    times.append(f"{radixSort.get_time(elements)*(1000000):.6f}")
+                    times.append(int(radixSort.get_time(elements)*(1000000)))
                 case 5:
-                    times.append(f"{linearSearch.get_time(elements)*(1000000):.6f}")
+                    times.append(int(linearSearch.get_time(elements)*(1000000)))
                 case _:
                     print("An error has occured")
         else:
