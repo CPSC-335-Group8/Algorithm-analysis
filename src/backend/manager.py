@@ -3,13 +3,14 @@ import mergeSort
 import insertionSort
 import quickSort
 import radixSort
+import linearSearch
 
 import random
 
 #test = [1,5,62,7,3,2,6,7,84,2,6126,236,6,36,26362,62,62,36]
 
 # Parameter one: list of bools. We use this to determin what algorithms we are running
-# [bubble sort, merge sort, insertion sort, quick sort, radix sort]
+# [bubble sort, merge sort, insertion sort, quick sort, radix sort, linear search]
 
 
 # Parameter two: Random array size. Generate a random array based of the size. IF SIZE == -1, the user has manually inputed an array
@@ -41,6 +42,8 @@ def get_times(algos: list[bool], size: int, arr) -> list[float]:
                     times.append(f"{quickSort.get_time(elements):.6f}")
                 case 4:
                     times.append(f"{radixSort.get_time(elements):.6f}")
+                case 5:
+                    times.append(f"{linearSearch.get_time(elements):.6f}")
                 case _:
                     print("An error has occured")
         else:
@@ -48,5 +51,5 @@ def get_times(algos: list[bool], size: int, arr) -> list[float]:
 
     print(times)
 
-algos = [True, False, True, True, False]
-get_times(algos, 100, [])
+algos = [True, True, True, True, True, True]
+get_times(algos, -1, [5, 52, 6, 20, 521, 5251, 0])
