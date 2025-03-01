@@ -12,9 +12,9 @@ def getStrings(times):
                 case 0:
                     algoNames.append("Bubble Sort")
                 case 1:
-                    algoNames.append("Merge Sort")
-                case 2:
                     algoNames.append("Insertion Sort")
+                case 2:
+                    algoNames.append("Merge Sort")
                 case 3:
                     algoNames.append("Quick Sort")
                 case 4:
