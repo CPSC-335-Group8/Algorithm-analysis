@@ -54,11 +54,9 @@ def showGraph(dictionary):
     
 
     i = 0
-    anim = animation.FuncAnimation(fig, animate, interval = 50, cache_frame_data=False)
+    anim = animation.FuncAnimation(fig, animate, interval = 1000/max(times), cache_frame_data=False)
     
     #labels
-    plt.xlabel("Algorithms")
     plt.ylabel("Execution Time(microseconds)")
     plt.title("Comparing Execution Time of Different Algorithms")
     plt.show()
-

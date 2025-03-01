@@ -253,9 +253,15 @@ def main():
                             validation_message = "Please select at least one algorithm to run."
                         else:
                             execution_times = {}
+                            execution_times["Bubble Sort"] = 0;
+                            execution_times["Insertion Sort"] = 0;
+                            execution_times["Merge Sort"] = 0;
+                            execution_times["Quick Sort"] = 0;
+                            execution_times["Radix Sort"] = 0;
+                            execution_times["Linear Search"] = 0;
                             for checkbox in selected_algorithms:
                                 temp_arr = arr.copy()
-                                start_time = time.time()
+                                start_time = time.perf_counter_ns()
 
                                 if checkbox.text == "Bubble Sort":
                                     bubble_sort(temp_arr)
@@ -271,11 +277,12 @@ def main():
                                     element = random.choice(temp_arr)
                                     linear_search(temp_arr, element)
 
-                                end_time = time.time()
-                                execution_times[checkbox.text] = int((end_time - start_time) * 1_000_000)
+                                end_time = time.perf_counter_ns()
+                                execution_times[checkbox.text] = int((end_time - start_time) / 1000) #* 1_000_000
 
                             if execution_times:
                                 results_screen = True
+                                print(execution_times.values())
                                 showGraph(getStrings(list(execution_times.values())))
                     else:
                         validation_message = "Invalid input! Please generate a valid array first."
